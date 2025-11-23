@@ -1,0 +1,40 @@
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-wrapper {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-content {
+  display: inline-flex;
+  animation: marquee 30s linear infinite;
+  will-change: transform;
+}
+
+.marquee-content:hover {
+  animation-play-state: paused;
+}
+
+.marquee-item {
+  flex-shrink: 0;
+  margin-right: 3rem;
+}
+
+@media (min-width: 768px) {
+  .marquee-item {
+    margin-right: 4rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .marquee-item {
+    margin-right: 5rem;
+  }
+}

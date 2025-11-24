@@ -3,6 +3,9 @@ import { Routes, Route } from "react-router-dom";
 import Home from "../pages/Home/Home";
 import About from "../pages/About/About";
 import Products from "../pages/Products/Products";
+import Customize from "../pages/Products/components/Customize";
+import ReqCustom from "../pages/Products/components/ReqCustom";
+import ReqSwatch from "../pages/Products/components/ReqSwatch";
 import WhyChooseArbella from "../pages/WhyChooseArbella/WhyChooseArbella";
 import Factory from "../pages/Factory/Factory";
 import Sustainability from "../pages/Sustainability/Sustainability";
@@ -14,12 +17,15 @@ import Dashboard from "../pages/Login/components/Dashboard";
 
 
 
+
+
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/about-us" element={<About />} />
       <Route path="/products" element={<Products />} />
+      <Route path="/customize" element={<Customize />} />
       <Route path="/why-choose-arbella" element={<WhyChooseArbella />} />
       <Route path="/our-factory" element={<Factory />} />
       <Route path="/sustainability" element={<Sustainability />} />
@@ -28,6 +34,8 @@ const AppRoutes = () => {
       <Route path="/log-in" element={<Login />} />
       <Route path="/Register" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/request-customization" element={<ReqCustom />} />
+      <Route path="/request-Swatch" element={<ReqSwatch />} />
       
 
       <Route

@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
 
 const OurProducts = () => {
   const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState("ALL");
   const [loading, setLoading] = useState(true);
+  const isAuthenticated = !!localStorage.getItem("authToken");
+  const [mustLoginIndex, setMustLoginIndex] = useState(null);
+
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/categories")
@@ -82,8 +87,8 @@ const OurProducts = () => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`text-base md:text-xl font-medium pb-2 transition-colors cursor-pointer ${activeTab === tab
-                  ? "border-b-2"
-                  : "text-[#868686] hover:text-gray-700"
+                ? "border-b-2"
+                : "text-[#868686] hover:text-gray-700"
                 }`}
               style={{
                 color: activeTab === tab ? "#FFA273" : undefined,
@@ -98,50 +103,53 @@ const OurProducts = () => {
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-14 gap-x-6">
           {filteredProducts.map((product, index) => (
-            <div key={index} className="flex flex-col">
-              {/* Product Image */}
-             <div className="relative w-full overflow-hidden rounded-2xl shadow-md bg-white" style={{ paddingTop: "100%" }}>
-  <img
-    src={product.image}
-    alt={product.productName || "Product Image"}
-    className="absolute top-0 left-0 w-full h-full object-cover"
-  />
-</div>
+            <div
+              key={index}
+              className="flex flex-col cursor-pointer"
+              onClick={() => {
+                if (isAuthenticated) {
+                  // go to customize page
+                  window.location.href = "/customize";
+                } else {
+                  // show login warning below the specific card
+                  setMustLoginIndex(index);
+                }
+              }}
+            >
+              <div className="relative w-full overflow-hidden rounded-2xl shadow-md bg-white" style={{ paddingTop: "100%" }}>
+                <img
+                  src={product.image}
+                  alt={product.productName}
+                  className="absolute top-0 left-0 w-full h-full object-cover"
+                />
+              </div>
 
-
-
-              {/* Product Info */}
               <div className="flex flex-col text-center">
                 <h3 className="text-lg md:text-[22px] font-semibold text-[#373737] mb-1">
-                  {product.productName || product.category}
+                  {product.productName}
                 </h3>
 
-                {product.productCode && product.productCode !== "N/A" && (
-                  <p
-                    className="text-sm md:text-base font-semibold mb-1"
-                    style={{ color: "#b44208ff" }}
-                  >
+                {product.productCode && (
+                  <p className="text-sm md:text-base font-semibold mb-1" style={{ color: "#b44208ff" }}>
                     Product Code: {product.productCode}
                   </p>
                 )}
 
-                {product.moq && product.moq !== "N/A" && (
-                  <p className="text-sm md:text-base font-[Montserrat] text-[#717171] mb-1">
-                    MOQ: {product.moq}
-                  </p>
-                )}
-
-                {product.fob && product.fob !== "N/A" && (
-                  <p className="text-sm md:text-base font-[Montserrat] text-[#717171] mb-3">
-                    FOB: {product.fob}
-                  </p>
-                )}
-
-                <p className="text-sm text-[#293037] leading-relaxed">
-                  {product.description || ""}
+                {product.moq && <p className="text-sm md:text-base text-[#717171] mb-1">MOQ: {product.moq}</p>}
+                {product.fob && <p className="text-sm md:text-base text-[#717171] mb-3">FOB: {product.fob}</p>}
+                <p className="text-sm text-[#293037]">
+                  {product.description}
                 </p>
               </div>
+
+              {/* 🔥 LOGIN REQUIRED MESSAGE */}
+              {!isAuthenticated && mustLoginIndex === index && (
+                <p className="text-red-600 text-center mt-2 text-sm font-medium">
+                  Log in to customize products
+                </p>
+              )}
             </div>
+
           ))}
         </div>
       </div>

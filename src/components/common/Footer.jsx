@@ -52,7 +52,7 @@ const bottomSocialIcons = [
               transition={{ duration: 0.3, delay: 0.1 }}
             >
               <motion.img
-                src="/assets/icons/arbella_Logo_White.svg"
+                src="/assets/icons/atlanticlogo.png"
                 alt="Arbella Logo"
                 className="h-16 md:h-20 mb-6 mx-auto md:mx-0"
                 initial={{ scale: 0.8, opacity: 0 }}

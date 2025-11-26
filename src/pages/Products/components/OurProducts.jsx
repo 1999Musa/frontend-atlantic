@@ -26,21 +26,24 @@ const OurProducts = () => {
   /** ------------------------------
    *   UNIFIED PRODUCT MAPPER
    * ------------------------------ */
-  const mapProduct = (prod, categoryDescription) => ({
-    id: prod.id,
-    productName: prod.productName,
-    productCode: prod.productCode ?? "N/A",
-    moq: prod.moq ?? "N/A",
-    fob: prod.fob ?? "N/A",
+const mapProduct = (prod, categoryDescription) => ({
+  id: prod.id,
+  productName: prod.productName,
+  productCode: prod.productCode ?? "N/A",
+  moq: prod.moq ?? "N/A",
+  fob: prod.fob ?? "N/A",
 
-    price: prod.price ?? "N/A",
-    discountedPrice: prod.discountedPrice ?? "N/A",
-    extraDescription: prod.extraDescription ?? "N/A",
+  price: prod.price ?? "N/A",
+  discountedPrice: prod.discountedPrice ?? "N/A",
+  extraDescription: prod.extraDescription ?? "N/A",
 
-    description: prod.description || categoryDescription,
-    images: prod.images || [],
-    image: prod.images?.length ? prod.images[0] : null,
-  });
+  description: prod.description || categoryDescription,
+  images: prod.images || [],
+  image: prod.images?.length ? prod.images[0] : null,
+
+  customizeImages: prod.customizeImages || [], // <-- add this line
+});
+
 
   const getFilteredProducts = () => {
     if (activeTab === "ALL") {
@@ -99,7 +102,7 @@ const OurProducts = () => {
             <div
               key={index}
               className="flex flex-col cursor-pointer"
-              onClick={() => navigate("/customize", { state: { product } })}
+              onClick={() => navigate("/customize", { state: { productId: product.id } })}
             >
               <div
                 className="relative w-full overflow-hidden rounded-2xl shadow-md bg-white"

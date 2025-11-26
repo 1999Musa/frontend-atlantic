@@ -1,10 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  TruckIcon,
-  ShoppingBagIcon,
-  LockClosedIcon,
-} from "@heroicons/react/24/outline";
+import { TruckIcon, ShoppingBagIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 
 import ReqCustom from "./ReqCustom";
 import ReqSwatch from "./ReqSwatch";
@@ -12,124 +8,115 @@ import ReqSwatch from "./ReqSwatch";
 const Customize = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const passedProduct = state?.product;
+  const productId = state?.productId;
 
-  const [product, setProduct] = useState(passedProduct || null);
+  const [product, setProduct] = useState(null);
   const [activeModal, setActiveModal] = useState(null);
+  const [mainImage, setMainImage] = useState(null);
+  const imgRef = useRef(null);
 
   const isLoggedIn = !!localStorage.getItem("authToken");
 
+  // 🔹 Fetch product in real time
+  const fetchProduct = async () => {
+    if (!productId) return;
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/products/${productId}`);
+      const data = await res.json();
+      setProduct(data);
+
+      // set first main image
+      const first =
+        data.images?.length
+          ? data.images[0]
+          : data.customizeImages?.length
+          ? data.customizeImages[0]
+          : null;
+      setMainImage(first);
+    } catch (err) {
+      console.log("Error fetching product:", err);
+    }
+  };
+
   useEffect(() => {
-    if (passedProduct) return;
-
-    const fetchProduct = async () => {
-      try {
-        const res = await fetch("http://127.0.0.1:8000/api/categories");
-        const categories = await res.json();
-
-        let found = null;
-        categories.forEach((cat) =>
-          cat.products.forEach((p) => {
-            if (p.id === state?.productId) {
-              found = {
-                productName: p.productName,
-                extraDescription: p.extraDescription,
-                price: p.price,
-                discountedPrice: p.discountedPrice,
-                images: p.images,
-                productCode: p.productCode,
-              };
-            }
-          })
-        );
-
-        setProduct(found);
-      } catch (error) {
-        console.log("Fetch error:", error);
-      }
-    };
-
     fetchProduct();
-  }, []);
+    // 🔹 Polling every 3 seconds (optional) to get real-time updates
+    const interval = setInterval(fetchProduct, 3000);
+    return () => clearInterval(interval);
+  }, [productId]);
 
-  if (!product) {
-    return (
-      <div className="text-center py-32 text-xl font-semibold">
-        Loading product...
-      </div>
-    );
-  }
-
-  const [mainImage, setMainImage] = useState(
-    product.images?.length ? product.images[0] : null
-  );
-
-  // ref for the main image so we can adjust transform and origin
-  const imgRef = useRef(null);
-
-  // move transform-origin to follow cursor
+  // 🖼 Zoom handlers
   const handleMouseMove = (e) => {
-    const container = e.currentTarget;
-    const rect = container.getBoundingClientRect();
+    const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-    if (imgRef.current) {
-      imgRef.current.style.transformOrigin = `${x}% ${y}%`;
-    }
+    if (imgRef.current) imgRef.current.style.transformOrigin = `${x}% ${y}%`;
   };
+  const handleMouseEnter = () => { if (imgRef.current) imgRef.current.style.transform = "scale(1.7)"; };
+  const handleMouseLeave = () => { if (imgRef.current) imgRef.current.style.transform = "scale(1)"; imgRef.current.style.transformOrigin = "center center"; };
 
-  const handleMouseEnter = () => {
-    if (imgRef.current) {
-      // increase scale on enter
-      imgRef.current.style.transform = "scale(1.7)";
-    }
-  };
+  if (!product) return <div className="text-center py-32 text-xl font-semibold">Loading product...</div>;
 
-  const handleMouseLeave = () => {
-    if (imgRef.current) {
-      // reset origin and scale
-      imgRef.current.style.transformOrigin = "center center";
-      imgRef.current.style.transform = "scale(1)";
-    }
-  };
+  const thumbImages = [...(product.images || []), ...(product.customizeImages || [])];
 
   return (
     <section className="relative max-w-[1250px] mx-auto px-6 py-24 mt-10">
       <div className="md:flex gap-14">
         {/* LEFT IMAGE AREA */}
         <div className="w-full md:w-1/2">
-          <div
-            className="relative w-full h-[450px] overflow-hidden rounded-lg shadow-md bg-white group cursor-zoom-in"
-            onMouseMove={handleMouseMove}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            <img
-              ref={imgRef}
-              src={mainImage}
-              className="w-full h-full object-cover"
-              alt="Product"
-              style={{
-                transformOrigin: "center center",
-                transform: "scale(1)",
-                transition: "transform 300ms ease, transform-origin 0s",
-                willChange: "transform, transform-origin",
-              }}
-            />
-          </div>
-
-          <div className="flex gap-4 justify-center mt-4">
-            {product.images.map((img, i) => (
+          {/* layout: main image on left, thumbnails as a vertical column on the right */}
+          <div className="flex items-start gap-6">
+            <div
+              className="relative w-[450px] h-[450px] overflow-hidden rounded-lg shadow-md bg-white group cursor-zoom-in"
+              onMouseMove={handleMouseMove}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
               <img
-                key={i}
-                src={img}
-                onClick={() => setMainImage(img)}
-                className={`w-24 h-24 object-cover rounded-md cursor-pointer shadow-md border-2 ${mainImage === img
-                  ? "border-[#FFA273]"
-                  : "border-transparent hover:border-gray-300"
-                  }`}
+                ref={imgRef}
+                src={mainImage}
+                className="w-full h-full object-contain"
+                alt="Product"
+                style={{
+                  transformOrigin: "center center",
+                  transform: "scale(1)",
+                  transition: "transform 300ms ease, transform-origin 0s",
+                  willChange: "transform, transform-origin",
+                }}
               />
-            ))}
+            </div>
+
+            {/* Thumbnails column (includes customizeImages) */}
+            <div className="flex flex-col gap-3 mt-2">
+              {thumbImages.map((img, i) => {
+                // mark customize images visually if you want (optional)
+                const isCustomize =
+                  product.customizeImages?.includes(img) && !product.images?.includes(img);
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setMainImage(img)}
+                    onMouseEnter={() => setMainImage(img)} // hovering a thumb will show it in main area so it becomes zoomable there
+                    className={`w-24 h-24 p-0 rounded-md overflow-hidden shadow-md border-2 focus:outline-none ${
+                      mainImage === img ? "border-[#FFA273]" : "border-transparent hover:border-gray-300"
+                    }`}
+                    aria-label={`Show thumbnail ${i + 1}`}
+                    type="button"
+                  >
+                    <img
+                      src={img}
+                      alt={`thumb-${i}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {isCustomize && (
+                      <span className="absolute right-1 top-1 bg-[#3A4980] text-white text-xs px-1 rounded">
+                        Custom
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 

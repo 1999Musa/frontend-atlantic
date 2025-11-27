@@ -33,19 +33,35 @@ const ReqCustom = ({ product, onClose }) => {
     return e;
   };
 
-  const handleSubmit = (ev) => {
-    ev.preventDefault();
-    const e = validate();
-    setErrors(e);
-    if (Object.keys(e).length === 0) {
-      console.log("Submitting", { ...form, file });
-      alert("Backend submission not implemented in this demo.");
-      onClose(); // Optional: Close modal on success
-    } else {
-      const firstErr = Object.keys(e)[0];
-      if (firstErr === "file") fileInputRef.current?.focus();
-    }
-  };
+const handleSubmit = async (ev) => {
+  ev.preventDefault();
+  const e = validate();
+  setErrors(e);
+  if (Object.keys(e).length > 0) return;
+
+  const formData = new FormData();
+  formData.append("product_id", product.id);
+  formData.append("name", form.name);
+  formData.append("email", form.email);
+  formData.append("phone_country", form.phoneCountry);
+  formData.append("phone_number", form.phoneNumber);
+  formData.append("quantity", form.quantity);
+  formData.append("message", form.message);
+  if (file) formData.append("attachment", file);
+
+  const res = await fetch("http://127.0.0.1:8000/api/custom-request", {
+    method: "POST",
+    body: formData,
+  });
+
+  const data = await res.json();
+
+  if (data.success) {
+    alert("Request Sent Successfully!");
+    onClose();
+  }
+};
+
 
   return (
     // FIXED OVERLAY WRAPPER

@@ -35,10 +35,34 @@ const ReqSwatch = ({ product, onClose }) => {
     setErrors(e);
 
     if (Object.keys(e).length === 0) {
-      console.log("Submitting swatch request:", form);
-      alert("Backend submission not implemented in this demo.");
-      onClose(); // Optional: Close on success
-    }
+  fetch("http://127.0.0.1:8000/api/swatch-request", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    name: form.name,
+    email: form.email,
+    phone_country: form.phoneCountry, // mapped
+    phone_number: form.phoneNumber,   // mapped
+    address: form.address,
+    message: form.message
+  }),
+})
+.then(res => res.json())
+.then(data => {
+  if(data.success) {
+    alert(data.message);
+    onClose();
+  } else {
+    alert("Something went wrong!");
+  }
+})
+.catch(err => {
+  console.error(err);
+  alert("Network error or CORS issue");
+});
+
+}
+
   };
 
   return (

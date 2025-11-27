@@ -25,22 +25,27 @@ const Customize = () => {
       const data = await res.json();
       setProduct(data);
 
-      // set first main image
+      // Determine the default first image
       const first =
         data.images?.length
           ? data.images[0]
           : data.customizeImages?.length
-          ? data.customizeImages[0]
-          : null;
-      setMainImage(first);
+            ? data.customizeImages[0]
+            : null;
+
+      // Only set the main image if it's currently empty (initial load).
+      setMainImage((prev) => prev || first);
+      
     } catch (err) {
       console.log("Error fetching product:", err);
     }
   };
 
   useEffect(() => {
+    // Reset main image when switching to a DIFFERENT product ID
+    setMainImage(null);
+    
     fetchProduct();
-    // 🔹 Polling every 3 seconds (optional) to get real-time updates
     const interval = setInterval(fetchProduct, 3000);
     return () => clearInterval(interval);
   }, [productId]);
@@ -61,10 +66,28 @@ const Customize = () => {
 
   return (
     <section className="relative max-w-[1250px] mx-auto px-6 py-24 mt-10">
+      
+      {/* 🔹 CUSTOM STYLES FOR THE ANIMATION */}
+      <style>{`
+        @keyframes slideInRight {
+          0% { opacity: 0; transform: translateX(50px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes modernBlink {
+          0%, 100% { box-shadow: 0 0 0px rgba(59, 130, 246, 0); transform: scale(1); }
+          50% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.6); transform: scale(1.03); }
+        }
+        .animate-entrance {
+          animation: slideInRight 2.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        .animate-attention {
+          animation: modernBlink 2s infinite ease-in-out;
+        }
+      `}</style>
+
       <div className="md:flex gap-14">
         {/* LEFT IMAGE AREA */}
         <div className="w-full md:w-1/2">
-          {/* layout: main image on left, thumbnails as a vertical column on the right */}
           <div className="flex items-start gap-6">
             <div
               className="relative w-[450px] h-[450px] overflow-hidden rounded-lg shadow-md bg-white group cursor-zoom-in"
@@ -86,27 +109,23 @@ const Customize = () => {
               />
             </div>
 
-            {/* Thumbnails column (includes customizeImages) */}
             <div className="flex flex-col gap-3 mt-2">
               {thumbImages.map((img, i) => {
-                // mark customize images visually if you want (optional)
                 const isCustomize =
                   product.customizeImages?.includes(img) && !product.images?.includes(img);
                 return (
                   <button
                     key={i}
                     onClick={() => setMainImage(img)}
-                    onMouseEnter={() => setMainImage(img)} // hovering a thumb will show it in main area so it becomes zoomable there
-                    className={`w-24 h-24 p-0 rounded-md overflow-hidden shadow-md border-2 focus:outline-none ${
-                      mainImage === img ? "border-[#FFA273]" : "border-transparent hover:border-gray-300"
-                    }`}
-                    aria-label={`Show thumbnail ${i + 1}`}
+                    onMouseEnter={() => setMainImage(img)}
+                    className={`w-24 h-24 p-0 rounded-md overflow-hidden shadow-md border-2 focus:outline-none ${mainImage === img ? "border-[#FFA273]" : "border-transparent hover:border-gray-300"
+                      }`}
                     type="button"
                   >
                     <img
                       src={img}
                       alt={`thumb-${i}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover cursor-pointer"
                     />
                     {isCustomize && (
                       <span className="absolute right-1 top-1 bg-[#3A4980] text-white text-xs px-1 rounded">
@@ -125,7 +144,8 @@ const Customize = () => {
           <h1 className="text-3xl font-bold">{product.productName}</h1>
 
           <div className="space-y-4 text-lg text-gray-700">
-            <div className="flex flex-wrap items-center gap-3">
+            {/* 🔹 PRICE & DISCOUNT BUTTON AREA */}
+            <div className="flex flex-wrap items-center gap-4 overflow-hidden p-1">
               <p
                 className={
                   isLoggedIn
@@ -137,35 +157,56 @@ const Customize = () => {
               </p>
 
               {!isLoggedIn && (
-                <div
+                <div 
                   onClick={() => navigate("/log-in")}
-                  className="cursor-pointer flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 shadow-sm hover:bg-blue-100"
+                  className="animate-entrance"
                 >
-                  <LockClosedIcon className="w-4 h-4 text-blue-500" />
-                  <span className="text-xs font-bold text-blue-600">
-                    Login for Discount
-                  </span>
+                  <div className="group relative cursor-pointer animate-attention rounded-full">
+                    <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 opacity-75 blur transition duration-1000 group-hover:opacity-100 group-hover:duration-200"></div>
+                    
+                    <div className="relative flex items-center gap-2 rounded-full bg-white px-4 py-1.5 ring-1 ring-gray-900/5">
+                      <LockClosedIcon className="w-4 h-4 text-blue-600 transition-transform group-hover:scale-110" />
+                      <span className="text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        Login for Discount
+                      </span>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
 
             {isLoggedIn && product.discountedPrice && (
-              <p className="text-green-700 font-bold text-2xl">
+              <p className="text-gray-900 font-bold text-2xl">
                 <strong>Discounted Price:</strong> ${product.discountedPrice}
               </p>
             )}
           </div>
 
-          <div className="mt-1 text-base text-gray-700">
+          <div className="mt-0 text-base text-gray-700">
             <span className="font-semibold">Product Code:</span> {product.productCode ?? "N/A"}
           </div>
 
-          <p className="text-lg mt-4">
-            <strong>Extra Description:</strong>{" "}
-            {product.extraDescription && product.extraDescription.trim() !== ""
-              ? product.extraDescription
-              : "N/A"}
-          </p>
+          {/* 🔹 EXTRA DESCRIPTION WITH HTML PARSING & STYLING */}
+          <div className="mt-4">
+            <strong className="text-lg block mb-2">Description:</strong>
+            
+            {product.extraDescription && product.extraDescription.trim() !== "" ? (
+              <div 
+                className="text-gray-700 text-base leading-relaxed
+                  [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-2 
+                  [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-2
+                  [&>p]:mb-2
+                  [&>strong]:font-bold [&>b]:font-bold 
+                  [&>em]:italic [&>i]:italic
+                  [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:mb-2
+                  [&>h2]:text-xl [&>h2]:font-bold [&>h2]:mb-2
+                  [&>a]:text-blue-600 [&>a]:underline"
+                dangerouslySetInnerHTML={{ __html: product.extraDescription }}
+              />
+            ) : (
+              <p className="text-lg">N/A</p>
+            )}
+          </div>
 
           <div className="flex flex-col gap-4 mt-6">
             <button
@@ -177,8 +218,8 @@ const Customize = () => {
                   navigate("/log-in");
                 }
               }}
-              className="w-[60%] py-3 text-white text-lg font-semibold rounded shadow-md hover:brightness-110  cursor-pointer"
-              style={{ backgroundColor: "#3A4980" }}
+              className="w-[60%] py-3 text-white text-lg font-semibold  shadow-md hover:brightness-110 cursor-pointer"
+              style={{ backgroundColor: "#2b3761ff" }}
             >
               Customize Product
             </button>
@@ -192,8 +233,8 @@ const Customize = () => {
                   navigate("/log-in");
                 }
               }}
-              className="w-[60%] py-3 text-white text-lg font-semibold rounded shadow-md hover:brightness-110 cursor-pointer"
-              style={{ backgroundColor: "#3A4980" }}
+              className="w-[60%] py-3 text-white text-lg font-semibold  shadow-md hover:brightness-110 cursor-pointer"
+              style={{ backgroundColor: "#2b3761ff" }}
             >
               Request Swatch
             </button>

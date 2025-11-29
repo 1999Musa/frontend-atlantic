@@ -29,10 +29,11 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { label: "HOME", path: "/" },
+    // { label: "HOME", path: "/" },
     { label: "ABOUT US", path: "/about-us" },
     { label: "PRODUCTS", path: "/products" },
-    { label: "WHY CHOOSE ATLANTIC", path: "/why-choose-arbella" },
+    { label: "WHY US", path: "/why-choose-arbella" },
+    { label: "PLACE ORDER ?", path: "/order" },
     { label: "OUR FACTORY", path: "/our-factory" },
     { label: "SUSTAINABILITY", path: "/sustainability" },
     { label: "COMMUNITY", path: "/community" },

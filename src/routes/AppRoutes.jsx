@@ -14,6 +14,7 @@ import Contact from "../pages/Contact/Contact";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Login/components/Register";
 import Dashboard from "../pages/Login/components/Dashboard";
+import Order from "../pages/Order/Order";
 
 
 
@@ -36,6 +37,8 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/request-customization" element={<ReqCustom />} />
       <Route path="/request-Swatch" element={<ReqSwatch />} />
+      <Route path="/order" element={<Order />} />
+
       
 
       <Route

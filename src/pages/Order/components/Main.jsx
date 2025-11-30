@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 const steps = [
@@ -37,6 +37,25 @@ const OrderTermsData = [
 const Main = () => {
     const [showPdfPreview, setShowPdfPreview] = useState(false);
 
+    // ---------------- HERO IMAGE FETCH ---------------- //
+    const [heroImage, setHeroImage] = useState(null);
+
+    useEffect(() => {
+        fetch("http://127.0.0.1:8000/api/order-hero")
+            .then(res => res.json())
+            .then(data => {
+                if (data.hero && data.hero.image) {
+                    setHeroImage(`http://127.0.0.1:8000/storage/${data.hero.image}`);
+                } else {
+                    setHeroImage(null);
+                }
+            })
+            .catch((err) => {
+                console.error("Failed to fetch hero image:", err);
+                setHeroImage(null);
+            });
+    }, []);
+
     return (
         <div className="w-full font-[Montserrat] overflow-x-hidden">
 
@@ -63,14 +82,29 @@ const Main = () => {
             )}
 
             {/* ---------------- HERO SECTION ---------------- */}
-            <div className="relative h-[400px] w-full flex items-center justify-center">
-                {/* Background Image with Overlay */}
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523275335684-37898b6baf30')] bg-cover bg-center">
-                    <div className="absolute inset-0 bg-black/40"></div>
+            <div 
+                className={`relative h-[600px] w-full flex items-center justify-center bg-gray-900 bg-cover bg-center transition-all duration-500`}
+                style={{
+                    backgroundImage: heroImage ? `url('${heroImage}')` : 'none'
+                }}
+            >
+                {/* Overlay: Only show if there is an image to ensure text readability */}
+                {/* {heroImage && <div className="absolute inset-0 bg-black/40"></div>} */}
+
+                <div className="relative z-10 text-center px-4">
+                    {/* <h1 className="text-5xl md:text-6xl font-bold text-white drop-shadow-lg tracking-wide mb-4">
+                        Place Your Order
+                    </h1> */}
+                    
+                    {/* Condition: If no image is set, show the text */}
+                    {!heroImage && (
+                        <div className="inline-block bg-white/10 backdrop-blur-sm px-4 py-2 rounded border border-white/20">
+                             <p className="text-gray-300 text-sm font-medium tracking-wider">
+                                NO HERO IMAGE SET YET
+                            </p>
+                        </div>
+                    )}
                 </div>
-                <h1 className="relative z-10 text-5xl md:text-6xl font-bold text-white drop-shadow-lg tracking-wide">
-                    Place Your Order
-                </h1>
             </div>
 
             {/* ---------------- ORDERING PROCESS (Timeline) ---------------- */}
@@ -82,7 +116,6 @@ const Main = () => {
                     </div>
 
                     <div className="relative">
-                        {/* Dashed Center Line */}
                         <div className="absolute left-1/2 top-0 bottom-0 w-px border-l-2 border-dashed border-gray-500 -translate-x-1/2 hidden md:block"></div>
 
                         <div className="flex flex-col gap-12 md:gap-24">
@@ -90,16 +123,12 @@ const Main = () => {
                                 const isEven = i % 2 === 0;
                                 return (
                                     <div key={i} className={`flex flex-col md:flex-row items-center md:justify-between w-full ${isEven ? "" : "md:flex-row-reverse"}`}>
-
-                                        {/* Empty Space for alignment on desktop */}
                                         <div className="w-full md:w-5/12 hidden md:block"></div>
 
-                                        {/* Center Bubble (Number) on the line */}
                                         <div className="z-10 bg-[#1F2937] text-[#FFA273] w-15 h-15 rounded-full flex items-center justify-center text-3xl font-bold shadow-lg border-4 border-[#F8F9FA] absolute left-1/2 -translate-x-1/2">
                                             {i + 1}
                                         </div>
 
-                                        {/* Card Content */}
                                         <motion.div
                                             initial={{ opacity: 0, x: isEven ? 50 : -50 }}
                                             whileInView={{ opacity: 1, x: 0 }}
@@ -108,7 +137,6 @@ const Main = () => {
                                             className="w-full md:w-5/12 relative"
                                         >
                                             <div className="bg-[#1F2937] p-8 rounded-lg shadow-xl relative text-white group hover:-translate-y-1 transition-transform duration-300">
-                                                {/* Orange Number on Left */}
                                                 <div className="flex gap-6">
                                                     <span className="text-[#FFA273] text-4xl font-bold opacity-90 flex-shrink-0">
                                                         {step.num}
@@ -135,7 +163,6 @@ const Main = () => {
             <div className="w-full bg-[#1F2937] text-gray-200 py-24 px-6 md:px-12">
                 <div className="max-w-6xl mx-auto">
 
-                    {/* Header */}
                     <div className="text-center mb-20">
                         <h2 className="text-4xl md:text-5xl font-serif text-white">
                             Order <span className="text-[#D97757]">Terms</span>
@@ -145,7 +172,6 @@ const Main = () => {
                         </p>
                     </div>
 
-                    {/* Terms Content Blocks */}
                     <div className="space-y-24">
                         {OrderTermsData.map((item, i) => (
                             <motion.div
@@ -156,7 +182,6 @@ const Main = () => {
                                 transition={{ duration: 0.6 }}
                                 className={`flex flex-col md:flex-row items-center gap-10 md:gap-16 ${i % 2 !== 0 ? "md:flex-row-reverse" : ""}`}
                             >
-                                {/* Text Side */}
                                 <div className="flex-1 space-y-6">
                                     <h3 className="text-3xl font-semibold text-white">{item.title}</h3>
                                     <p className="text-gray-300 leading-relaxed whitespace-pre-line text-sm md:text-base">
@@ -172,7 +197,6 @@ const Main = () => {
                                     )}
                                 </div>
 
-                                {/* Image Side */}
                                 <div className="flex-1 w-full">
                                     <div className="relative rounded-2xl overflow-hidden shadow-2xl h-[300px] md:h-[350px] w-full">
                                         <img

@@ -1,112 +1,141 @@
 import React, { useEffect, useState } from "react";
 
-export default function Dashboard() {
+const Dashboard = () => {
   const [swatchRequests, setSwatchRequests] = useState([]);
   const [customRequests, setCustomRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-  const token = localStorage.getItem("authToken");
+  const API_TOKEN = "aFNBbmVJSldXMUxEWXplb0dWYXVxUk5CanJOQlZwQnp3SlNYRTExcg==";
+
+  const fetchRequests = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const [swatchRes, customRes] = await Promise.all([
+        fetch("http://127.0.0.1:8000/api/user/swatch-requests", {
+          headers: {
+            Authorization: `Bearer ${authToken }`,
+            Accept: "application/json",
+          },
+        }),
+        fetch("http://127.0.0.1:8000/api/user/custom-requests", {
+          headers: {
+            Authorization: `Bearer ${authToken }`,
+            Accept: "application/json",
+          },
+        }),
+      ]);
+
+      if (!swatchRes.ok || !customRes.ok) {
+        throw new Error(`HTTP error!`);
+      }
+
+      const swatchData = await swatchRes.json();
+      const customData = await customRes.json();
+
+      setSwatchRequests(swatchData.data || []);
+      setCustomRequests(customData.data || []);
+      setLastUpdated(new Date().toLocaleString());
+    } catch (err) {
+      console.error("Error loading dashboard:", err);
+      setError("Failed to load requests. Check console for details.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchRequests();
   }, []);
 
-  const fetchRequests = async () => {
-    setLoading(true);
-
-    try {
-      // Fetch Swatch Requests
-      const swatchRes = await fetch("http://127.0.0.1:8000/api/user/swatch-requests", {
-  headers: { Authorization: `Bearer ${token}` },
-});
-
-      const swatchData = await swatchRes.json();
-
-      if (swatchData.success) {
-        setSwatchRequests(swatchData.data);
-      }
-
-      // Fetch Custom Requests
-const customRes = await fetch("http://127.0.0.1:8000/api/user/custom-requests", {
-  headers: { Authorization: `Bearer ${token}` },
-});
-
-      const customData = await customRes.json();
-
-      if (customData.success) {
-        setCustomRequests(customData.data);
-      }
-    } catch (error) {
-      console.error("Error loading dashboard:", error);
-    }
-
-    setLoading(false);
-  };
-
-  if (loading) {
-    return <div className="p-6 text-center text-xl ">Loading...</div>;
-  }
+  if (loading) return <div>Loading dashboard...</div>;
+  if (error) return <div style={{ color: "red" }}>{error}</div>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 mt-30">My Requests</h1>
+    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif", marginTop: "30px" }}>
+      <h2>My Requests</h2>
+      <button
+        onClick={fetchRequests}
+        style={{
+          marginBottom: "20px",
+          padding: "8px 16px",
+          cursor: "pointer",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          borderRadius: "4px",
+        }}
+      >
+        Refresh
+      </button>
+      {lastUpdated && <p>Last updated: {lastUpdated}</p>}
 
-      {/* Swatch Requests */}
-      <section className="mb-10">
-        <h2 className="text-2xl font-semibold mb-3">Swatch Requests</h2>
-
+      <section style={{ marginBottom: "40px" }}>
+        <h3>Swatch Requests</h3>
         {swatchRequests.length === 0 ? (
-          <p className="text-gray-500">No swatch requests found.</p>
+          <p>No swatch requests found.</p>
         ) : (
-          <div className="space-y-4">
-            {swatchRequests.map((req) => (
-  <div key={req.id} className="p-4 border rounded-lg shadow-sm bg-white flex justify-between items-center">
-    <div>
-      <p><strong>Product Code:</strong> {req.product_code}</p>
-      <p><strong>Product Name:</strong> {req.product_name}</p>
-      <p><strong>Date:</strong> {new Date(req.created_at).toLocaleDateString()}</p>
-    </div>
-    <span className={`px-3 py-1 text-sm rounded-full ${
-      req.status === "pending"
-        ? "bg-yellow-200 text-yellow-700"
-        : req.status === "approved"
-        ? "bg-green-200 text-green-700"
-        : "bg-red-200 text-red-700"
-    }`}>{req.status}</span>
-  </div>
-))}
-          </div>
+          <table border="1" cellPadding="8" cellSpacing="0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Product Code</th>
+                <th>Product Name</th>
+                <th>Created At</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {swatchRequests.map((req) => (
+                <tr key={req.id}>
+                  <td>{req.id}</td>
+                  <td>{req.product_code}</td>
+                  <td>{req.product_name}</td>
+                  <td>{new Date(req.created_at).toLocaleString()}</td>
+                  <td>{req.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </section>
 
-      {/* Custom Requests */}
       <section>
-        <h2 className="text-2xl font-semibold mb-3">Customization Requests</h2>
-
+        <h3>Customization Requests</h3>
         {customRequests.length === 0 ? (
-          <p className="text-gray-500">No customization requests found.</p>
+          <p>No customization requests found.</p>
         ) : (
-          <div className="space-y-4">
-            {customRequests.map((req) => (
-  <div key={req.id} className="p-4 border rounded-lg shadow-sm bg-white flex justify-between items-center">
-    <div>
-      <p><strong>Product Code:</strong> {req.product_code}</p>
-      <p><strong>Product Name:</strong> {req.product_name}</p>
-      <p><strong>Quantity:</strong> {req.quantity}</p>
-      <p><strong>Date:</strong> {new Date(req.created_at).toLocaleDateString()}</p>
-    </div>
-    <span className={`px-3 py-1 text-sm rounded-full ${
-      req.status === "pending"
-        ? "bg-yellow-200 text-yellow-700"
-        : req.status === "approved"
-        ? "bg-green-200 text-green-700"
-        : "bg-red-200 text-red-700"
-    }`}>{req.status}</span>
-  </div>
-))}
-          </div>
+          <table border="1" cellPadding="8" cellSpacing="0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Product Code</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Created At</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {customRequests.map((req) => (
+                <tr key={req.id}>
+                  <td>{req.id}</td>
+                  <td>{req.product_code}</td>
+                  <td>{req.product_name}</td>
+                  <td>{req.quantity}</td>
+                  <td>{new Date(req.created_at).toLocaleString()}</td>
+                  <td>{req.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </section>
     </div>
   );
-}
+};
+
+export default Dashboard;

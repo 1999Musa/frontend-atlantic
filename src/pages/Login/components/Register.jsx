@@ -71,30 +71,28 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center relative overflow-hidden font-sans selection:bg-emerald-500 selection:text-white mt-10">
+        <div className="min-h-screen bg-[#f7fdff] flex items-center justify-center relative  font-sans text-black mt-0">
 
-            {/* Animated Blobs */}
-            <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-teal-500/30 rounded-full blur-3xl opacity-50 animate-pulse"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-600/30 rounded-full blur-3xl opacity-50 animate-pulse delay-1000"></div>
 
             <div className="relative z-10 w-full max-w-md mx-4 mt-14">
-                <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-8 md:p-10">
+                <div className="  p-8 md:p-10">
 
-                    {/* Header */}
-                    <div className="text-center mb-8">
-                        <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-300 tracking-tight mb-2">
-                            Create Account
+                    {/* /* Header */}
+                    <div className="text-center mb-8 ">
+                        <h2 className="text-4xl font-bold font-Inter text-[#FFA273] mb-2">
+                            Register Now for Free Membership
                         </h2>
-                        <p className="text-slate-400 text-sm">
-                            Fill the form to register your account
+                        <p className="text-slate-700 text-xl  mb-2">
+                            Member enjoys up to 50% discount from USA Retail Price
+                        </p>
+                        <p className="text-slate-700 text-m " style={{ color: "#FFA273" }}>
+                            Personal Information
                         </p>
                     </div>
 
                     <form onSubmit={handleSubmit} noValidate className="space-y-6">
-
-                        {/* Name */}
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">
+                            <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider ">
                                 Full Name
                             </label>
                             <div className="relative group">
@@ -105,7 +103,7 @@ export default function Register() {
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-600/50 rounded-xl text-white"
+                                    className="block w-full pl-12 pr-4 py-3.5  border  text-gray-500"
                                     placeholder="John Doe"
                                 />
                             </div>
@@ -113,7 +111,7 @@ export default function Register() {
 
                         {/* Email */}
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">
+                            <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider ml-1">
                                 Email Address
                             </label>
                             <div className="relative group">
@@ -124,7 +122,7 @@ export default function Register() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-600/50 rounded-xl text-white"
+                                    className="block w-full pl-12 pr-4 py-3.5 border  text-gray-500"
                                     placeholder="you@example.com"
                                 />
                             </div>
@@ -132,7 +130,7 @@ export default function Register() {
 
                         {/* Password */}
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">
+                            <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider ml-1">
                                 Password
                             </label>
                             <div className="relative group">
@@ -144,7 +142,7 @@ export default function Register() {
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-600/50 rounded-xl text-white"
+                                    className="block w-full pl-12 pr-4 py-3.5 border  text-gray-500"
                                     placeholder="••••••••"
                                 />
 
@@ -154,14 +152,14 @@ export default function Register() {
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-white"
                                 >
-                                    {showPassword ? "🙈" : "👁️"}
+                                    {showPassword ? "👁️" : "🙈"}
                                 </button>
                             </div>
                         </div>
 
                         {/* Confirm Password */}
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">
+                            <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider ml-1">
                                 Confirm Password
                             </label>
                             <div className="relative group">
@@ -173,7 +171,7 @@ export default function Register() {
                                     type={showPassword ? "text" : "password"}
                                     value={confirm}
                                     onChange={(e) => setConfirm(e.target.value)}
-                                    className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-600/50 rounded-xl text-white"
+                                    className="block w-full pl-12 pr-4 py-3.5 border text-gray-500"
                                     placeholder="••••••••"
                                 />
 
@@ -182,7 +180,7 @@ export default function Register() {
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-white"
                                 >
-                                    {showPassword ? "🙈" : "👁️"}
+                                    {showPassword ? "👁️" : "🙈"}
                                 </button>
                             </div>
                         </div>
@@ -195,22 +193,25 @@ export default function Register() {
                         )}
 
                         {/* Buttons */}
-                        <div className="pt-2 flex flex-col gap-3">
+                        <div className=" flex flex-col gap-3 items-center">
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className={`w-full py-3.5 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg ${loading ? "opacity-70" : "cursor-pointer"}`}
+                                className={`w-1/2 py-3.5  text-xl font-bold bg-[#FFA273] text-white  shadow-lg ${loading ? "opacity-70" : "cursor-pointer"}`}
                             >
-                                {loading ? "Creating account..." : "Register"}
+                                {loading ? "Creating account..." : "Sign Up"}
                             </button>
 
-                            <button
-                                type="button"
-                                onClick={() => navigate("/log-in")}
-                                className="w-full py-2 text-sm font-medium text-slate-400 hover:text-white"
-                            >
-                                Already have an account? Login
-                            </button>
+                            <div className="text-center text-sm text-gray-600 mt-4">
+                                Already Have an Account ?{" "}
+                                <button
+                                    type="button"
+                                    onClick={() => navigate("/log-in")}
+                                    className="text-[#FFA273] font-semibold hover:underline cursor-pointer"
+                                >
+                                    Log In
+                                </button>
+                            </div>
                         </div>
                     </form>
 

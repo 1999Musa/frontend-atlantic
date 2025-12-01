@@ -5,7 +5,6 @@ const OurProducts = () => {
   const [categories, setCategories] = useState([]);
   const [activeTab, setActiveTab] = useState("ALL");
   const [loading, setLoading] = useState(true);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,27 +22,33 @@ const OurProducts = () => {
 
   const tabs = ["ALL", ...categories.map((cat) => cat.title.toUpperCase())];
 
-  /** ------------------------------
-   *   UNIFIED PRODUCT MAPPER
-   * ------------------------------ */
-const mapProduct = (prod, categoryDescription) => ({
-  id: prod.id,
-  productName: prod.productName,
-  productCode: prod.productCode ?? "N/A",
-  moq: prod.moq ?? "N/A",
-  fob: prod.fob ?? "N/A",
+  // Helper: Strip HTML tags safely
+  const stripHtml = (html) => {
+    if (!html) return null;
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    const text = div.textContent || div.innerText || "";
+    return text.trim() || null;
+  };
 
-  price: prod.price ?? "N/A",
-  discountedPrice: prod.discountedPrice ?? "N/A",
-  extraDescription: prod.extraDescription ?? "N/A",
+  const mapProduct = (prod, categoryDescription) => {
+    const cleanDescription = stripHtml(prod.description) || stripHtml(categoryDescription);
 
-  description: prod.description || categoryDescription,
-  images: prod.images || [],
-  image: prod.images?.length ? prod.images[0] : null,
-
-  customizeImages: prod.customizeImages || [], // <-- add this line
-});
-
+    return {
+      id: prod.id,
+      productName: prod.productName,
+      productCode: prod.productCode ?? null,
+      moq: prod.moq ?? null,
+      fob: prod.fob ?? null,
+      price: prod.price ?? null,
+      discountedPrice: prod.discountedPrice ?? null,
+      extraDescription: prod.extraDescription ?? null,
+      description: cleanDescription, // Only clean text here
+      images: prod.images || [],
+      image: prod.images?.length ? prod.images[0] : null,
+      customizeImages: prod.customizeImages || [],
+    };
+  };
 
   const getFilteredProducts = () => {
     if (activeTab === "ALL") {
@@ -51,12 +56,10 @@ const mapProduct = (prod, categoryDescription) => ({
         cat.products.map((prod) => mapProduct(prod, cat.description))
       );
     }
-
     const category = categories.find(
       (cat) => cat.title.toUpperCase() === activeTab
     );
     if (!category) return [];
-
     return category.products.map((prod) =>
       mapProduct(prod, category.description)
     );
@@ -85,10 +88,10 @@ const mapProduct = (prod, categoryDescription) => ({
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`text-xl pb-2 transition ${
+              className={`text-xl pb-2 transition font-medium ${
                 activeTab === tab
-                  ? "border-b-2 border-[#FFA273]"
-                  : "text-[#868686]"
+                  ? "text-[#FFA273] border-b-2 border-[#FFA273]"
+                  : "text-[#868686] hover:text-gray-900"
               }`}
             >
               {tab}
@@ -98,30 +101,30 @@ const mapProduct = (prod, categoryDescription) => ({
 
         {/* PRODUCT GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-14 gap-x-6">
-          {filteredProducts.map((product, index) => (
+          {filteredProducts.map((product) => (
             <div
-              key={index}
-              className="flex flex-col cursor-pointer"
+              key={product.id}
+              className="flex flex-col cursor-pointer group"
               onClick={() => navigate("/customize", { state: { productId: product.id } })}
             >
               <div
-                className="relative w-full overflow-hidden rounded-2xl shadow-md bg-white"
+                className="relative w-full overflow-hidden rounded-2xl shadow-md bg-white "
                 style={{ paddingTop: "100%" }}
               >
                 <img
-                  src={product.image}
+                  src={product.image || "/placeholder.jpg"}
                   alt={product.productName}
-                  className="absolute top-0 left-0 w-full h-full object-cover"
+                  className="absolute top-0 left-0 w-full h-full object-cover "
                 />
               </div>
 
-              <div className="flex flex-col text-center mt-3">
+              <div className="flex flex-col text-center mt-4">
                 <h3 className="text-lg md:text-[22px] font-semibold text-[#373737] mb-1">
                   {product.productName}
                 </h3>
 
                 {product.productCode && (
-                  <p className="text-sm text-[#b44208ff] font-semibold">
+                  <p className="text-sm text-[#b44208] font-semibold">
                     Product Code: {product.productCode}
                   </p>
                 )}
@@ -129,15 +132,18 @@ const mapProduct = (prod, categoryDescription) => ({
                 {product.moq && (
                   <p className="text-sm text-[#717171]">MOQ: {product.moq}</p>
                 )}
+
                 {product.fob && (
                   <p className="text-sm text-[#717171] mb-2">
                     FOB: {product.fob}
                   </p>
                 )}
 
-                <p className="text-sm text-[#293037]">
-                  {product.description}
-                </p>
+                {product.description ? (
+                  <p className="text-sm text-[#293037] line-clamp-2 mt-1">
+                    {product.description}
+                  </p>
+                ) : null}
               </div>
             </div>
           ))}

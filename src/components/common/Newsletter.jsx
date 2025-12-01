@@ -10,7 +10,7 @@ const Newsletter = () => {
     <section
       className="w-full flex flex-col justify-center items-center bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: `linear-gradient(0deg, rgba(255, 164, 117, 0.77) 0%, rgba(255, 164, 117, 0.77) 100%), url('/assets/images/common/newsletterBG.jpg')`,
+        backgroundImage: `linear-gradient(0deg, rgba(58, 135, 199, 0.54) 0%, rgba(58, 135, 199, 0.54) 100%), url('/assets/images/common/newsletterBG.jpg')`,
         minHeight: "269px",
         padding: "60px 20px",
         gap: "47px",

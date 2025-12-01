@@ -37,7 +37,6 @@ export default function User() {
         return setError("Invalid credentials. Please try again.");
       }
 
-      // REQUIRED FOR DASHBOARD
       localStorage.setItem("authToken", data.token);
       localStorage.setItem("userEmail", data.user.email);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -51,31 +50,27 @@ export default function User() {
     }
   };
 
-
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center relative overflow-hidden font-sans selection:bg-emerald-500 selection:text-white mt-10 ">
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/30 rounded-full blur-3xl opacity-50 animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-600/30 rounded-full blur-3xl opacity-50 animate-pulse delay-1000"></div>
-
+    <div className="min-h-screen bg-[#f7fdff] flex items-center justify-center relative overflow-hidden font-sans mt-10">
       <div className="relative z-10 w-full max-w-md mx-4 mt-20">
-        <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-8 md:p-10">
+        <div className="bg-[#f7fdff] border border-gray-200 shadow-lg p-8 md:p-10">
           <div className="text-center mb-4">
-            <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-300 tracking-tight mb-2">
+            <h2 className="text-4xl font-bold text-black tracking-tight mb-2">
               Pls Login
             </h2>
-            <p className="text-slate-400 text-sm">To access your account</p>
+            <p className="text-gray-600 text-sm">To access your account</p>
           </div>
 
           <form onSubmit={handleSubmit} noValidate className="space-y-6">
             {/* Email */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">
+              <label className="text-xs font-semibold text-black uppercase tracking-wider ml-1">
                 Email Address
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg
-                    className="h-5 w-5 text-slate-400 group-focus-within:text-emerald-400 transition-colors"
+                    className="h-5 w-5 text-gray-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -90,7 +85,7 @@ export default function User() {
                 </div>
                 <input
                   type="email"
-                  className="block w-full pl-12 pr-4 py-3.5 bg-slate-800/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all duration-200 sm:text-sm"
+                  className="block w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FFA273] focus:border-[#FFA273] transition-all duration-200 sm:text-sm"
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -100,13 +95,13 @@ export default function User() {
 
             {/* Password */}
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider ml-1">
+              <label className="text-xs font-semibold text-black uppercase tracking-wider ml-1">
                 Password
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg
-                    className="h-5 w-5 text-slate-400 group-focus-within:text-emerald-400 transition-colors"
+                    className="h-5 w-5 text-gray-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -120,7 +115,7 @@ export default function User() {
 
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="block w-full pl-12 pr-12 py-3.5 bg-slate-800/50 border border-slate-600/50 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all duration-200 sm:text-sm"
+                  className="block w-full pl-12 pr-12 py-3.5 bg-white border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#FFA273] focus:border-[#FFA273] transition-all duration-200 sm:text-sm"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -129,7 +124,7 @@ export default function User() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-white"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-black"
                 >
                   {showPassword ? (
                     <svg
@@ -164,7 +159,7 @@ export default function User() {
 
             {/* Error */}
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+              <div className="flex items-center gap-2 p-3 bg-red-100 border border-red-300 text-red-700 text-sm">
                 <svg
                   className="h-4 w-4"
                   fill="none"
@@ -183,30 +178,25 @@ export default function User() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3.5 px-4 rounded-xl text-sm font-bold text-white 
-                bg-gradient-to-r from-emerald-500 to-teal-500 
-                hover:from-emerald-400 hover:to-teal-400
-                transition-all duration-300 shadow-lg shadow-emerald-500/20
-                ${loading ? "opacity-80 cursor-not-allowed" : ""}
-                `}
+              className={`w-full py-3.5 px-4 text-sm font-bold text-white bg-[#FFA273] hover:bg-[#ff9156] transition-all duration-300 ${loading ? "opacity-80 cursor-not-allowed" : ""}`}
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
-          <div className="text-center text-sm text-slate-400 mt-4">
+          <div className="text-center text-sm text-gray-600 mt-4">
             Not registered yet?{" "}
             <button
               type="button"
               onClick={() => navigate("/Register")}
-              className="text-emerald-400 font-semibold hover:underline"
+              className="text-[#FFA273] font-semibold hover:underline"
             >
               Create an account
             </button>
           </div>
         </div>
 
-        <p className="text-center text-[10px] text-slate-600 mt-3">
+        <p className="text-center text-[10px] text-gray-500 mt-3">
           Tip: Use your registered email & password
         </p>
       </div>

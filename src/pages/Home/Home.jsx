@@ -7,6 +7,7 @@ import Certified from "./components/Certified";
 import Whyus from "./components/Whyus";
 import Manufacture from "./components/Manufacture";
 import Brandsupport from "./components/Brandsupport";
+import Register from "../Login/components/Register";
 
 const Home = () => {
   return (
@@ -16,6 +17,7 @@ const Home = () => {
       <ProductVarient />
       <Manufacture />
       <Brandsupport />
+      < Register />
       <Factory />
       {/* <ShortStory /> */}
       <Certified />

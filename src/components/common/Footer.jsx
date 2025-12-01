@@ -39,7 +39,7 @@ const bottomSocialIcons = [
       {/* Main Footer Section */}
       <div
         className="w-full font-[Montserrat] overflow-hidden"
-        style={{ backgroundColor: "#293037" }}
+        style={{ backgroundColor: "#2c4155ff" }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20 overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 text-center md:text-left">
@@ -336,8 +336,8 @@ const bottomSocialIcons = [
               viewport={{ once: true }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
-              <span className="not-italic text-white">Developed by </span>
-              <span className="italic text-[#FFA475] hover:text-[#ffb68b]">
+              <span className="not-italic text-blue-300">Developed by </span>
+              <span className="italic text-[#ffffff] hover:text-[#ffb68b]">
                 Musa Md Obayed
               </span>
             </motion.a>

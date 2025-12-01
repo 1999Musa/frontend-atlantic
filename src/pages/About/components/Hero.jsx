@@ -167,7 +167,7 @@ const Hero = () => {
 
         {/* ---------------- 3. SOCIAL ICONS SIDEBAR ---------------- */}
         {/* Attached to the video section to maintain the original look */}
-        <motion.div
+        {/* <motion.div
           className="
             absolute 
             top-1/2 -translate-y-1/2 right-0
@@ -221,7 +221,7 @@ const Hero = () => {
               />
             </motion.a>
           ))}
-        </motion.div>
+        </motion.div> */}
       </section>
     </div>
   );

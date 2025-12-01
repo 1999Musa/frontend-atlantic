@@ -48,7 +48,7 @@ const Navbar = () => {
       <motion.header
         className="fixed top-0 left-0 w-full z-50 flex justify-center items-center"
         style={{
-          background: "rgba(255, 255, 255, 0.25)",
+          background: "rgba(96, 177, 243, 0.42)",
           boxShadow: "0 4px 16px 0 rgba(31, 38, 135, 0.2)",
           backdropFilter: "blur(20px)",
           border: "1px solid rgba(255, 255, 255, 0.18)",
@@ -56,7 +56,7 @@ const Navbar = () => {
         }}
         initial={{ y: -90, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
       >
         <div className="flex justify-between items-center w-full max-w-[1400px] px-4 sm:px-6 lg:px-10">
           {/* Logo */}

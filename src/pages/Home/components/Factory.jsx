@@ -45,6 +45,7 @@ const Factory = () => {
   }
 
   return (
+    // Ensure the section background matches the mask color defined below
     <section className="w-full px-4 py-16 md:py-24 bg-[#F7FDFF]">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -65,31 +66,55 @@ const Factory = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
           >
-            Operating our own state-of-the-art garment factory with 
-            <br className="hidden md:block" /> 
-            <p> advanced machinery, skilled team, and strict compliance.</p> 
+            Operating our own state-of-the-art garment factory with
+            <br className="hidden md:block" />
+            <span className="block mt-2">
+              advanced machinery, skilled team, and strict compliance.
+            </span>
           </motion.p>
         </motion.div>
 
-        {/* Factory Image with Button */}
+        {/* Factory Image Container with Custom Corner */}
         <motion.div
-          className="relative w-full rounded-3xl overflow-hidden"
+          // 1. Set up the container with relative positioning and explicit height
+          className="relative w-full h-[400px] md:h-[550px] overflow-hidden "
+          // 2. Apply rounding to all corners EXCEPT the top-right
+          style={{
+            borderTopLeftRadius: "20px",
+            borderBottomLeftRadius: "20px",
+            borderBottomRightRadius: "20px",
+          }}
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-          whileHover={{ scale: 1.02, transition: { duration: 0.3 } }}
+          whileHover={{ scale: 1.01, transition: { duration: 0.3 } }}
         >
+          {/* The Image */}
           <img
             src={factoryImage}
             alt="Our Factory"
-            className="w-full h-auto object-cover"
+            className="w-full h-full object-cover relative z-0 "
           />
 
-          {/* Button positioned on top right */}
+          {/* 3. The "Cut-out" Mask Div
+              This sits on top of the image in the top-right corner.
+              It has the same color as the section background and an inward curve. */}
+          <div
+            className="absolute top-0 right-0 bg-[#F7FDFF] z-10 pointer-events-none"
+            style={{
+              width: "190px", // Slightly wider than the button
+              height: "70px", // Slightly taller than the button
+              borderBottomLeftRadius: "12px", // Creates the inward curve
+            }}
+          />
+
+          {/* 4. The Button
+              Positioned absolutely on top of the mask, with a small margin to center it. */}
           <motion.button
             onClick={handleClick}
-            className="group absolute top-0 right-0 md:top-1 md:right-2 flex items-center gap-0.5 rounded-[10px] bg-black transition-all duration-200 p-0.5 hover:shadow-lg cursor-pointer"
+            // Adjusted positioning to center it within the cut-out mask
+            className="group absolute top-1 right-1 z-20 flex items-center gap-0.5 rounded-[10px] bg-black transition-all duration-200 p-0.5 hover:shadow-lg cursor-pointer"
             initial={{ opacity: 0, x: 20, y: -20 }}
             whileInView={{ opacity: 1, x: 0, y: 0 }}
             viewport={{ once: true }}
@@ -100,6 +125,7 @@ const Factory = () => {
             }}
             whileTap={{ scale: 0.95 }}
           >
+            {/* Hover effect preserved intact */}
             <div className="flex items-center justify-center w-8 md:w-10 h-8 md:h-10 transition-all duration-200 group-hover:order-2 order-1">
               <img
                 src="/assets/icons/topRightArrow.svg"
@@ -108,7 +134,7 @@ const Factory = () => {
               />
             </div>
 
-            <div className="flex items-center justify-center h-10 md:h-[46px] px-2 md:px-3 py-3 md:py-[15px] rounded-lg bg-white transition-all duration-200 group-hover:order-1 order-2">
+            <div className="flex items-center justify-center h-10 md:h-[46px] px-3 md:px-5 py-3 md:py-[15px] rounded-lg bg-white transition-all duration-200 group-hover:order-1 order-2">
               <span className="text-sm md:text-base font-medium text-black whitespace-nowrap">
                 Our factory
               </span>

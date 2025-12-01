@@ -28,7 +28,7 @@ const AppRoutes = () => {
       <Route path="/about-us" element={<About />} />
       <Route path="/products" element={<Products />} />
       <Route path="/customize" element={<Customize />} />
-      <Route path="/why-choose-arbella" element={<WhyChooseArbella />} />
+      <Route path="/why-choose-atlantic" element={<WhyChooseArbella />} />
       <Route path="/our-factory" element={<Factory />} />
       <Route path="/sustainability" element={<Sustainability />} />
       <Route path="/community" element={<Community />} />

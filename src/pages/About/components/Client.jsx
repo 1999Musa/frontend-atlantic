@@ -22,7 +22,7 @@ const Client = () => {
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <h2 className='text-[40px] md:text-[48px] font-["Playfair_Display"] font-normal leading-[52px] text-[#2C2C2C]'>
-          Our <span className="text-[#FFA273]">Clients</span>
+          Our <span className="text-[#FFA273]">Certificates</span>
         </h2>
       </motion.div>
 

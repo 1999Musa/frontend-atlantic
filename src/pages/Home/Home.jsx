@@ -10,6 +10,7 @@ import Brandsupport from "./components/Brandsupport";
 import Register from "../Login/components/Register";
 
 const Home = () => {
+  const isLoggedIn = !!localStorage.getItem("authToken");
   return (
     <div>
       <Hero />
@@ -17,7 +18,9 @@ const Home = () => {
       <ProductVarient />
       <Manufacture />
       <Brandsupport />
-      < Register />
+      {/* Only show Register for non-logged in users */}
+      {!isLoggedIn && <Register />}
+
       <Factory />
       {/* <ShortStory /> */}
       <Certified />

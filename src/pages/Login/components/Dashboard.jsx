@@ -156,7 +156,7 @@ const BagView = () => {
            <a href="/products" className="text-[#5D5FEF] font-semibold mt-2 inline-block hover:underline">Start Shopping</a>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-slate-50 transition-colors border border-slate-200 rounded-lg shadow-sm overflow-hidden">
           <div className="divide-y divide-slate-100">
             {bag.map((item) => {
               const product = item.product;
@@ -168,7 +168,7 @@ const BagView = () => {
                 : "https://placehold.co/100x100?text=No+Image";
 
               return (
-                <div key={item.id} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
+                <div key={item.id} className="flex items-center justify-between p-4 hover:bg-gray-200 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-20 h-20 bg-slate-100 rounded-md overflow-hidden flex-shrink-0 border border-slate-200">
                       <img
@@ -193,7 +193,7 @@ const BagView = () => {
 
                   <button
                     onClick={() => removeFromBag(item.id)}
-                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
                     title="Remove Item"
                   >
                     <Icons.Trash />

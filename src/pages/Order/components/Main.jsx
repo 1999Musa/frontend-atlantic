@@ -22,7 +22,7 @@ const OrderTermsData = [
   },
   {
     title: "Payment Terms",
-    text: "Our payment structure is simple and transparent:\n\n1. Advance Payment:\n30% advance payment is required at the time of signing the sales contract.\n\n2. Final Payment:\nThe remaining balance must be paid within 15 days from the date you receive the goods.",
+    text: "Our payment structure is simple and transparent:\n\n1. Advance Payment:\n30% advance payment is required at the time of signing the sales contract.\n\n2. Final Payment:\nThe remaining balance must be paid within 7 days from the date you receive the goods.",
     btn: null,
     img: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600",
   },

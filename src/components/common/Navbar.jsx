@@ -33,7 +33,7 @@ const Navbar = () => {
     { label: "ABOUT US", path: "/about-us" },
     { label: "PRODUCTS", path: "/products" },
     { label: "WHY US ?", path: "/why-choose-atlantic" },
-    { label: "PLACE ORDER ?", path: "/order" },
+    { label: "PLACE ORDER", path: "/order" },
     { label: "OUR FACTORY", path: "/our-factory" },
     { label: "SUSTAINABILITY", path: "/sustainability" },
     { label: "COMMUNITY", path: "/community" },

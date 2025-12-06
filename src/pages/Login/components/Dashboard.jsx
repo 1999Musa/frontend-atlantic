@@ -31,6 +31,9 @@ const Icons = {
   ),
   Lock: () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+  ),
+  Trash: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
   )
 };
 
@@ -48,19 +51,12 @@ const SidebarItem = ({ icon: Icon, active, onClick }) => (
 
 const StatusBadge = ({ status }) => {
   const normalized = (status || "Pending").toLowerCase();
-
   let dotColor = "bg-red-500";
   let textColor = "text-slate-700";
 
-  if (normalized === "approved") {
-    dotColor = "bg-green-500";
-  } else if (normalized === "delivered") {
-    dotColor = "bg-blue-500";
-  } else if (normalized === "completed") {
-    dotColor = "bg-green-500";
-  } else if (normalized === "canceled" || normalized === "rejected") {
-    dotColor = "bg-red-500";
-  }
+  if (normalized === "approved") dotColor = "bg-green-500";
+  else if (normalized === "delivered") dotColor = "bg-blue-500";
+  else if (normalized === "completed") dotColor = "bg-green-500";
 
   return (
     <div className="flex items-center gap-2">
@@ -70,7 +66,147 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-// --- Profile View Component ---
+// --- COMPONENT: Bag View ---
+const BagView = () => {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBag();
+  }, []);
+
+ const fetchBag = async () => {
+  const token = localStorage.getItem("authToken");
+  try {
+    const res = await fetch("http://127.0.0.1:8000/api/user/bag", {
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (data.success) {
+      setItems(data.bag || []); // <- corrected
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const removeItem = async (id) => {
+    if(!window.confirm("Remove item from bag?")) return;
+    const token = localStorage.getItem("authToken");
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/api/user/bag/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setItems(items.filter(item => item.id !== id));
+      }
+    } catch (err) {
+      alert("Failed to delete");
+    }
+  };
+
+  // Calculate Total
+const total = items.reduce((acc, item) => {
+  const price = parseFloat(item.product?.discounted_price || item.product?.price || 0);
+  return acc + price;
+}, 0);
+
+  return (
+    <div className="max-w-5xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col mb-6">
+        <h1 className="text-3xl font-bold text-slate-900">My Shopping Bag</h1>
+        <p className="text-slate-500 mt-1">Review the products you have selected.</p>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-20 text-slate-400">Loading bag...</div>
+      ) : items.length === 0 ? (
+        <div className="text-center py-20 bg-white rounded-lg border border-dashed border-slate-300">
+           <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
+             <Icons.Bag />
+           </div>
+           <p className="text-slate-500">Your bag is empty.</p>
+           <a href="/products" className="text-[#5D5FEF] font-semibold mt-2 inline-block hover:underline">Start Shopping</a>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+           {/* Bag Items List */}
+           <div className="lg:col-span-2 bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+              <div className="divide-y divide-slate-100">
+                {items.map((item) => {
+                  const product = item.product;
+                  if(!product) return null;
+                  
+                  // Handle images safely
+                  let images = [];
+                  try {
+                     images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
+                  } catch(e) { images = []; }
+                  const image = images && images.length > 0 ? images[0] : null;
+
+                  return (
+                    <div key={item.id} className="p-4 flex gap-4 items-center group hover:bg-slate-50 transition-colors">
+                       <div className="w-20 h-20 bg-slate-100 rounded-md overflow-hidden flex-shrink-0 border border-slate-200">
+                          {image && <img src={image} alt={product.productName} className="w-full h-full object-cover" />}
+                       </div>
+                       <div className="flex-grow">
+                          <h4 className="font-bold text-slate-800">{product.productName}</h4>
+                          <p className="text-xs text-slate-500 uppercase">{product.productCode}</p>
+                          <div className="flex gap-2 mt-1 items-center">
+                             {product.discountedPrice ? (
+                               <>
+                                 <span className="font-bold text-slate-900">${product.discountedPrice}</span>
+                                 <span className="text-xs text-slate-400 line-through">${product.price}</span>
+                               </>
+                             ) : (
+                               <span className="font-bold text-slate-900">${product.price}</span>
+                             )}
+                          </div>
+                       </div>
+                       <button 
+                         onClick={() => removeItem(item.id)}
+                         className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                         title="Remove"
+                       >
+                         <Icons.Trash />
+                       </button>
+                    </div>
+                  );
+                })}
+              </div>
+           </div>
+
+           {/* Summary Sidebar */}
+           <div className="lg:col-span-1 h-fit">
+              <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-6 sticky top-6">
+                 <h3 className="font-bold text-slate-800 text-lg mb-4">Summary</h3>
+                 <div className="flex justify-between items-center mb-2 text-slate-600">
+                    <span>Subtotal</span>
+                    <span>${total.toFixed(2)}</span>
+                 </div>
+                 <div className="flex justify-between items-center mb-4 text-slate-600">
+                    <span>Shipping</span>
+                    <span className="text-green-600 font-medium">Free</span>
+                 </div>
+                 <div className="border-t border-slate-100 pt-4 flex justify-between items-center font-bold text-slate-900 text-xl mb-6">
+                    <span>Total</span>
+                    <span>${total.toFixed(2)}</span>
+                 </div>
+                 <button className="w-full bg-[#5D5FEF] hover:bg-[#4a4ce6] text-white py-3 rounded-lg font-bold shadow-md transition-all active:scale-95">
+                    Checkout Now
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --- COMPONENT: Profile View ---
 const ProfileView = () => {
   const [user, setUser] = useState({ name: "", email: "" });
   const [pass, setPass] = useState({ current: "", new: "", confirm: "" });
@@ -88,15 +224,12 @@ const ProfileView = () => {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      if (data.success) {
-        setUser({ name: data.user.name, email: data.user.email });
+      if (data.success && data.user) {
+        setUser({ name: data.user.name || "", email: data.user.email || "" });
       }
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
   };
 
-  // Update profile details
   const updateProfile = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -106,59 +239,41 @@ const ProfileView = () => {
     try {
       const res = await fetch("http://127.0.0.1:8000/api/user/update", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(user),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         setMsg({ type: "success", text: "Profile updated successfully!" });
-        const storedUser = JSON.parse(localStorage.getItem('user'));
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
         localStorage.setItem('user', JSON.stringify({ ...storedUser, ...data.user }));
       } else {
         setMsg({ type: "error", text: data.message || "Failed to update" });
       }
-    } catch (err) {
-      setMsg({ type: "error", text: "Network error" });
-    }
+    } catch (err) { setMsg({ type: "error", text: "Network error" }); }
     setLoading(false);
   };
 
-  // Change password
   const updatePassword = async (e) => {
     e.preventDefault();
-    if (pass.new !== pass.confirm) {
-      setMsg({ type: "error", text: "New passwords do not match" });
-      return;
-    }
+    if (pass.new !== pass.confirm) { setMsg({ type: "error", text: "New passwords do not match" }); return; }
     setLoading(true);
     const token = localStorage.getItem("authToken");
 
     try {
       const res = await fetch("http://127.0.0.1:8000/api/user/change-password", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          current_password: pass.current,
-          new_password: pass.new,
-          new_password_confirmation: pass.confirm,
-        }),
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ current_password: pass.current, new_password: pass.new, new_password_confirmation: pass.confirm }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         setMsg({ type: "success", text: "Password changed successfully!" });
         setPass({ current: "", new: "", confirm: "" });
       } else {
         setMsg({ type: "error", text: data.message || "Failed to change password" });
       }
-    } catch (err) {
-      setMsg({ type: "error", text: "Network error" });
-    }
+    } catch (err) { setMsg({ type: "error", text: "Network error" }); }
     setLoading(false);
   };
 
@@ -168,110 +283,42 @@ const ProfileView = () => {
         <h1 className="text-3xl font-bold text-slate-900">Profile Settings</h1>
         <p className="text-slate-500 mt-1">Manage your account details and security.</p>
       </div>
-
-      {msg.text && (
-        <div className={`p-4 rounded-lg mb-6 border ${msg.type === "success" ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700"}`}>
-          {msg.text}
-        </div>
-      )}
-
+      {msg.text && <div className={`p-4 rounded-lg mb-6 border ${msg.type === "success" ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700"}`}>{msg.text}</div>}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-        {/* Update Details Card */}
         <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
-            <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
-              <Icons.User />
-            </div>
+            <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center"><Icons.User /></div>
             <h3 className="font-bold text-slate-800 text-lg">Account Information</h3>
           </div>
-
           <form onSubmit={updateProfile} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name</label>
-              <input
-                type="text"
-                value={user.name}
-                onChange={(e) => setUser({ ...user, name: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#5D5FEF] focus:border-transparent outline-none transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
-              <input
-                type="email"
-                value={user.email}
-                onChange={(e) => setUser({ ...user, email: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#5D5FEF] focus:border-transparent outline-none transition-all"
-              />
-            </div>
-            <button
-              disabled={loading}
-              className="mt-2 w-full bg-[#5D5FEF] hover:bg-[#4a4ce6] text-white py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50"
-            >
-              {loading ? "Saving..." : "Save Changes"}
-            </button>
+            <div><label className="block text-sm font-semibold text-slate-700 mb-1">Full Name</label><input type="text" value={user.name} onChange={(e) => setUser({ ...user, name: e.target.value })} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#5D5FEF] focus:border-transparent outline-none transition-all" /></div>
+            <div><label className="block text-sm font-semibold text-slate-700 mb-1">Email Address</label><input type="email" value={user.email} onChange={(e) => setUser({ ...user, email: e.target.value })} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#5D5FEF] focus:border-transparent outline-none transition-all" /></div>
+            <button disabled={loading} className="mt-2 w-full bg-[#5D5FEF] hover:bg-[#4a4ce6] text-white py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50">{loading ? "Saving..." : "Save Changes"}</button>
           </form>
         </div>
-
-        {/* Change Password Card */}
         <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
-            <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center">
-              <Icons.Lock />
-            </div>
+            <div className="w-10 h-10 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center"><Icons.Lock /></div>
             <h3 className="font-bold text-slate-800 text-lg">Security</h3>
           </div>
-
           <form onSubmit={updatePassword} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Current Password</label>
-              <input
-                type="password"
-                value={pass.current}
-                onChange={(e) => setPass({ ...pass, current: e.target.value })}
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-200 focus:border-orange-400 outline-none transition-all"
-              />
-            </div>
+            <div><label className="block text-sm font-semibold text-slate-700 mb-1">Current Password</label><input type="password" value={pass.current} onChange={(e) => setPass({ ...pass, current: e.target.value })} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-200 focus:border-orange-400 outline-none transition-all" /></div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">New Password</label>
-                <input
-                  type="password"
-                  value={pass.new}
-                  onChange={(e) => setPass({ ...pass, new: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-200 focus:border-orange-400 outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Confirm</label>
-                <input
-                  type="password"
-                  value={pass.confirm}
-                  onChange={(e) => setPass({ ...pass, confirm: e.target.value })}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-200 focus:border-orange-400 outline-none transition-all"
-                />
-              </div>
+              <div><label className="block text-sm font-semibold text-slate-700 mb-1">New Password</label><input type="password" value={pass.new} onChange={(e) => setPass({ ...pass, new: e.target.value })} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-200 focus:border-orange-400 outline-none transition-all" /></div>
+              <div><label className="block text-sm font-semibold text-slate-700 mb-1">Confirm</label><input type="password" value={pass.confirm} onChange={(e) => setPass({ ...pass, confirm: e.target.value })} className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-200 focus:border-orange-400 outline-none transition-all" /></div>
             </div>
-            <button
-              disabled={loading}
-              className="mt-2 w-full bg-slate-800 hover:bg-slate-900 text-white py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50"
-            >
-              {loading ? "Updating..." : "Update Password"}
-            </button>
+            <button disabled={loading} className="mt-2 w-full bg-slate-800 hover:bg-slate-900 text-white py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50">{loading ? "Updating..." : "Update Password"}</button>
           </form>
         </div>
-
       </div>
     </div>
   );
 };
 
-
-// --- Main Dashboard Component ---
+// --- COMPONENT: Main Dashboard ---
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("requests"); // Controls Sidebar state
+  const [activeTab, setActiveTab] = useState("profile");
   const [customRequests, setCustomRequests] = useState([]);
   const [swatchRequests, setSwatchRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -280,184 +327,82 @@ export default function Dashboard() {
   const fetchRequests = async () => {
     setLoading(true);
     const token = localStorage.getItem("authToken");
-    if (!token) {
-      setError("You are not logged in");
-      setLoading(false);
-      return;
-    }
+    if (!token) { setError("You are not logged in"); setLoading(false); return; }
 
     try {
       const [customRes, swatchRes] = await Promise.all([
-        fetch("http://127.0.0.1:8000/api/user/custom-requests", {
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        }),
-        fetch("http://127.0.0.1:8000/api/user/swatch-requests", {
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        }),
+        fetch("http://127.0.0.1:8000/api/user/custom-requests", { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }),
+        fetch("http://127.0.0.1:8000/api/user/swatch-requests", { headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }),
       ]);
-
       if (!customRes.ok || !swatchRes.ok) throw new Error("Failed to fetch data");
-
       const customData = await customRes.json();
       const swatchData = await swatchRes.json();
-
       setCustomRequests(customData.data || []);
       setSwatchRequests(swatchData.data || []);
       setError("");
-    } catch (err) {
-      console.error(err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err); setError(err.message); } finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchRequests();
-  }, []);
+  useEffect(() => { fetchRequests(); }, []);
 
-  // Shared Table Logic
   const RequestTable = ({ title, data, type }) => (
     <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm flex flex-col h-full">
       <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white">
         <h3 className="font-bold text-slate-800 text-lg">{title}</h3>
-        <a
-          href="/products"
-          className="flex items-center gap-1 bg-[#5D5FEF] text-white text-xs px-3 py-1.5 rounded hover:bg-[#4a4ce6] transition-colors"
-        >
-          <Icons.Plus /> Add {type}
-        </a>
+        <a href="/products" className="flex items-center gap-1 bg-[#5D5FEF] text-white text-xs px-3 py-1.5 rounded hover:bg-[#4a4ce6] transition-colors"><Icons.Plus /> Add {type}</a>
       </div>
-
-      {/* Table Header */}
       <div className="grid grid-cols-12 bg-gray-50 p-3 text-xs font-bold text-slate-800">
         <div className="col-span-5 pl-2">Product Name</div>
         <div className="col-span-3">Request ID</div>
         <div className="col-span-4">Status</div>
       </div>
-
       <div className="divide-y divide-slate-100 flex-grow">
-        {data.length === 0 ? (
-          <div className="p-6 text-center text-slate-400 text-sm italic">
-            No {type} requests yet.
+        {data.length === 0 ? <div className="p-6 text-center text-slate-400 text-sm italic">No {type} requests yet.</div> : data.map((req) => (
+          <div key={req.id} className="grid grid-cols-12 p-4 items-center hover:bg-slate-50 transition-colors text-sm">
+            <div className="col-span-5 flex flex-col pl-2"><span className="font-medium text-slate-700">{req.product_name}</span><span className="text-xs text-slate-400 mt-0.5 truncate pr-2">{req.message ? req.message.substring(0, 20) + "..." : "No details"}</span></div>
+            <div className="col-span-3 font-mono text-slate-500 text-xs">{type === 'Custom' ? 'CR' : 'SW'}-{req.id}</div>
+            <div className="col-span-4"><StatusBadge status={req.status} /></div>
           </div>
-        ) : (
-          data.map((req) => (
-            <div key={req.id} className="grid grid-cols-12 p-4 items-center hover:bg-slate-50 transition-colors text-sm">
-              <div className="col-span-5 flex flex-col pl-2">
-                <span className="font-medium text-slate-700">{req.product_name}</span>
-                <span className="text-xs text-slate-400 mt-0.5 truncate pr-2">
-                  {req.message ? req.message.substring(0, 20) + "..." : "No details"}
-                </span>
-              </div>
-              <div className="col-span-3 font-mono text-slate-500 text-xs">
-                {type === 'Custom' ? 'CR' : 'SW'}-{req.id}
-              </div>
-              <div className="col-span-4">
-                <StatusBadge status={req.status} />
-              </div>
-            </div>
-          ))
-        )}
+        ))}
       </div>
     </div>
   );
 
   return (
     <div className="flex min-h-screen bg-[#F3F4F6] font-sans">
-
-      {/* --- Sidebar --- */}
+      
+      {/* Sidebar */}
       <aside className="w-20 bg-[#1E1E24] flex flex-col items-center py-6 flex-shrink-0 mt-22">
-        <div className="mb-10">
-          <Icons.Logo />
-        </div>
-
+        <div className="mb-10"><Icons.Logo /></div>
         <nav className="flex flex-col items-center w-full">
-          {/* <SidebarItem
-            icon={Icons.Grid}
-            active={activeTab === "dashboard"}
-            onClick={() => setActiveTab("dashboard")}
-          /> */}
-          <SidebarItem
-            icon={Icons.Bag}
-            active={activeTab === "shop"}
-            onClick={() => setActiveTab("shop")}
-          />
-          <SidebarItem
-            icon={Icons.Folder}
-            active={activeTab === "requests"}
-            onClick={() => setActiveTab("requests")}
-          />
-          {/* Profile Tab */}
-          <SidebarItem
-            icon={Icons.User}
-            active={activeTab === "profile"}
-            onClick={() => setActiveTab("profile")}
-          />
+          <SidebarItem icon={Icons.Bag} active={activeTab === "bag"} onClick={() => setActiveTab("bag")} />
+          <SidebarItem icon={Icons.Folder} active={activeTab === "requests"} onClick={() => setActiveTab("requests")} />
+          <SidebarItem icon={Icons.User} active={activeTab === "profile"} onClick={() => setActiveTab("profile")} />
         </nav>
-
         <div className="mt-10">
-          <button
-            onClick={() => {
-              localStorage.removeItem("authToken");
-              localStorage.removeItem("user");
-              window.location.href = "/";
-            }}
-            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all text-gray-900 hover:text-white hover:bg-red-500/20 bg-red-500"
-            title="Logout"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
+          <button onClick={() => { localStorage.removeItem("authToken"); localStorage.removeItem("user"); window.location.href = "/"; }} className="w-10 h-10 rounded-xl flex items-center justify-center transition-all text-gray-900 hover:text-white hover:bg-red-500/20 bg-red-500" title="Logout">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
           </button>
         </div>
       </aside>
 
-      {/* --- Main Content Area --- */}
+      {/* Main Content */}
       <main className="flex-grow p-8 overflow-y-auto mt-20">
-
+        
         {/* VIEW 1: REQUESTS */}
         {activeTab === "requests" && (
           <div className="max-w-6xl mx-auto animate-in fade-in zoom-in-95 duration-300">
             <div className="flex flex-col mb-6">
               <div className="flex justify-between items-end">
-                <div>
-                  <h1 className="text-3xl font-bold text-slate-900">My Requests</h1>
-                  <p className="text-slate-500 mt-1">
-                    Here’s your quick access to customization and swatches.
-                  </p>
-                </div>
-                <button
-                  onClick={fetchRequests}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 text-sm font-medium hover:bg-slate-50 transition-all shadow-sm"
-                >
-                  <Icons.Refresh /> Refresh
-                </button>
+                <div><h1 className="text-3xl font-bold text-slate-900">My Requests</h1><p className="text-slate-500 mt-1">Here’s your quick access to customization and swatches.</p></div>
+                <button onClick={fetchRequests} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-600 text-sm font-medium hover:bg-slate-50 transition-all shadow-sm"><Icons.Refresh /> Refresh</button>
               </div>
             </div>
-
-            {error && (
-              <div className="bg-red-50 text-red-600 p-3 rounded mb-6 text-sm border border-red-200">
-                {error}
-              </div>
-            )}
-
-            {loading ? (
-              <div className="text-center py-20 text-slate-400">Loading requests...</div>
-            ) : (
+            {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-6 text-sm border border-red-200">{error}</div>}
+            {loading ? <div className="text-center py-20 text-slate-400">Loading requests...</div> : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <RequestTable
-                  title="Customization Requests"
-                  data={customRequests}
-                  type="Custom"
-                />
-                <RequestTable
-                  title="Swatch Requests"
-                  data={swatchRequests}
-                  type="Swatch"
-                />
+                <RequestTable title="Customization Requests" data={customRequests} type="Custom" />
+                <RequestTable title="Swatch Requests" data={swatchRequests} type="Swatch" />
               </div>
             )}
           </div>
@@ -466,13 +411,13 @@ export default function Dashboard() {
         {/* VIEW 2: PROFILE */}
         {activeTab === "profile" && <ProfileView />}
 
-        {/* VIEW 3: PLACEHOLDER */}
-        {activeTab !== "requests" && activeTab !== "profile" && (
-          <div className="flex items-center justify-center h-full text-slate-400">
-            Select the Folder icon to view Requests or User icon for Profile
-          </div>
-        )}
+        {/* VIEW 3: BAG (NEW) */}
+        {activeTab === "bag" && <BagView />}
 
+        {/* DEFAULT VIEW */}
+        {activeTab !== "requests" && activeTab !== "profile" && activeTab !== "bag" && (
+          <div className="flex items-center justify-center h-full text-slate-400">Select an icon to begin</div>
+        )}
       </main>
     </div>
   );

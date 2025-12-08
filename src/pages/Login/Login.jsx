@@ -2,7 +2,7 @@ import React from "react";
 import User from "./components/User";
 
 
-const Contact = () => {
+const Login = () => {
 	return (
 		<div>
 			<User />
@@ -10,4 +10,4 @@ const Contact = () => {
 	);
 };
 
-export default Contact;
+export default Login;
